@@ -13,7 +13,7 @@ class CafeBillingSystem:
         self.root.geometry("800x600")
         self.root.configure(bg='#f5f5dc')
         
-        # Menu items and prices
+        # Menu 
         self.menu_items = {
             "Coffee": 10,
             "Tea": 8,
@@ -31,11 +31,11 @@ class CafeBillingSystem:
         self.setup_ui()
     
     def setup_ui(self):
-        # Main container
+        
         main_frame = tk.Frame(self.root, bg='#f5f5dc')
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # Left panel - Menu
+        
         menu_frame = tk.Frame(main_frame, bg='#8b7355', relief=tk.GROOVE, bd=3)
         menu_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
         
@@ -51,7 +51,7 @@ class CafeBillingSystem:
                           command=lambda i=item, p=price: self.add_item(i, p))
             btn.pack(pady=8, padx=15)
         
-        # Right panel - Order
+    
         order_frame = tk.Frame(main_frame, bg='#8b7355', relief=tk.GROOVE, bd=3)
         order_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
         
@@ -70,7 +70,7 @@ class CafeBillingSystem:
                                    bg='#8b7355', fg='#ffd700')
         self.total_label.pack(pady=15)
         
-        # Action buttons
+        
         button_frame = tk.Frame(order_frame, bg='#8b7355')
         button_frame.pack(pady=15)
         
@@ -115,10 +115,10 @@ class CafeBillingSystem:
         receipt_text = self.generate_receipt_text()
         
         try:
-            # Try to print with thermal printer
+            
             self.thermal_print(receipt_text)
         except:
-            # Fallback: save to file
+            
             self.save_receipt_to_file(receipt_text)
             messagebox.showinfo("Info", "Receipt saved to receipt.txt")
     
@@ -146,14 +146,14 @@ class CafeBillingSystem:
             system = platform.system().lower()
             
             if system == "android":
-                # Android POS device printing
+                
                 self.android_pos_print(text)
             elif system == "windows":
-                # Windows - try POS printer first, then USB
+                
                 if not self.windows_pos_print(text):
                     self.windows_usb_print(text)
             else:
-                # Fallback to USB printing
+            
                 self.windows_usb_print(text)
                 
         except Exception as e:
@@ -162,16 +162,13 @@ class CafeBillingSystem:
     def android_pos_print(self, text):
         """Print on Android POS devices"""
         try:
-            # Try Android POS printing methods
-            # Method 1: Direct POS printer command
+            
             if self.try_android_raw_print(text):
                 return
             
-            # Method 2: Android Bluetooth printing
             if self.try_android_bluetooth_print(text):
                 return
             
-            # Method 3: Android USB printing
             if self.try_android_usb_print(text):
                 return
             
@@ -183,7 +180,6 @@ class CafeBillingSystem:
     def try_android_raw_print(self, text):
         """Try raw print command on Android POS"""
         try:
-            # Common Android POS printer paths
             pos_paths = [
                 "/dev/usb/lp0",
                 "/dev/usb/lp1", 
@@ -195,12 +191,10 @@ class CafeBillingSystem:
             for path in pos_paths:
                 try:
                     with open(path, 'w', encoding='utf-8') as f:
-                        # Add printer initialization commands
-                        init_cmd = b'\x1B\x40'  # Initialize printer
+                        init_cmd = b'\x1B\x40'  
                         f.write(init_cmd.decode('latin-1'))
                         f.write(text)
-                        # Cut paper command
-                        cut_cmd = b'\x1B\x64\x02'  # Cut paper
+                        cut_cmd = b'\x1B\x64\x02'  
                         f.write(cut_cmd.decode('latin-1'))
                         return True
                 except:
@@ -212,7 +206,6 @@ class CafeBillingSystem:
     def try_android_bluetooth_print(self, text):
         """Try Bluetooth printing on Android"""
         try:
-            # Use PyBluez for Android if available
             import bluetooth
             nearby_devices = bluetooth.discover_devices()
             
@@ -232,7 +225,6 @@ class CafeBillingSystem:
     def try_android_usb_print(self, text):
         """Try USB printing on Android"""
         try:
-            # Use android-usb-printer if available
             from usbprinter import UsbPrinter
             printer = UsbPrinter()
             printer.print_text(text)
@@ -243,15 +235,12 @@ class CafeBillingSystem:
     def windows_pos_print(self, text):
         """Print on Windows POS devices"""
         try:
-            # Method 1: Windows POS printer (POS for .NET)
             if self.try_windows_pos_dotnet(text):
                 return True
             
-            # Method 2: Raw Windows printer
             if self.try_windows_raw_print(text):
                 return True
             
-            # Method 3: Windows default printer
             if self.try_windows_default_print(text):
                 return True
             
@@ -263,7 +252,6 @@ class CafeBillingSystem:
         """Try Windows POS for .NET printer"""
         try:
             import clr
-            # Add POS for .NET reference if available
             clr.AddReference("Microsoft.PointOfService")
             from Microsoft.PointOfService import PosExplorer
             
@@ -277,7 +265,6 @@ class CafeBillingSystem:
                     printer.Claim(1000)
                     printer.DeviceEnabled = True
                     
-                    # Print receipt
                     printer.PrintNormal(PrinterStation.Receipt, text)
                     printer.CutPaper(100)
                     
@@ -296,20 +283,17 @@ class CafeBillingSystem:
             import win32print
             import win32api
             
-            # Get available printers
             printers = win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)
             
             for printer in printers:
                 try:
-                    printer_name = printer[2]  # Printer name
+                    printer_name = printer[2]  
                     
-                    # Check if it's a thermal printer
                     if any(keyword in printer_name.lower() 
                           for keyword in ['thermal', 'pos', 'receipt', 'ticket']):
                         
                         hPrinter = win32print.OpenPrinter(printer_name)
                         try:
-                            # Raw print
                             pDoc = {"pDataType": "RAW"}
                             win32print.StartDocPrinter(hPrinter, 1, pDoc)
                             win32print.WritePrinter(hPrinter, text.encode('utf-8'))
@@ -329,7 +313,6 @@ class CafeBillingSystem:
             import win32print
             import win32api
             
-            # Get default printer
             printer_name = win32print.GetDefaultPrinter()
             hPrinter = win32print.OpenPrinter(printer_name)
             
@@ -337,12 +320,10 @@ class CafeBillingSystem:
                 pDoc = {"pDataType": "RAW"}
                 win32print.StartDocPrinter(hPrinter, 1, pDoc)
                 
-                # Add ESC/POS commands for thermal printer
-                esc_commands = b'\x1B\x40'  # Initialize
+                esc_commands = b'\x1B\x40'  
                 win32print.WritePrinter(hPrinter, esc_commands)
                 win32print.WritePrinter(hPrinter, text.encode('utf-8'))
                 
-                # Cut paper
                 cut_command = b'\x1B\x64\x02'
                 win32print.WritePrinter(hPrinter, cut_command)
                 
@@ -358,7 +339,6 @@ class CafeBillingSystem:
         try:
             from escpos.printer import Usb
             
-            # Common thermal printer vendor/product IDs:
             printers_to_try = [
                 (0x04b8, 0x0202),  # Epson TM-T88
                 (0x04b8, 0x0e15),  # Epson TM-T20
