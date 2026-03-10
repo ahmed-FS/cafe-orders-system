@@ -1,0 +1,6 @@
+tkinter
+python-escpos==3.1
+pywin32==306
+pybluez
+pyusb
+android-usb-printer
