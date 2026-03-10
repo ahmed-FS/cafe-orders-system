@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 POS Device Setup Script for Café Billing System
 Installs required dependencies and configures printer access
@@ -85,20 +84,18 @@ def main():
     print("=== Café Billing System POS Setup ===")
     print(f"Platform: {platform.system()}")
     
-    # Install dependencies based on platform
     system = platform.system().lower()
     
     if system == "windows":
         install_windows_dependencies()
     elif system == "linux":
-        install_windows_dependencies()  # For Linux USB printers
+        install_windows_dependencies()  
     elif system == "android":
         install_android_dependencies()
     else:
         print("Unsupported platform")
         return
     
-    # Test printer access
     test_printer_access()
     
     print("\n=== Setup Complete ===")
